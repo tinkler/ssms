@@ -1,0 +1,1 @@
+DROP schema IF EXISTS sys;

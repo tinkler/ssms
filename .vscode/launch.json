@@ -1,0 +1,88 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "flu smss",
+            "cwd": "frontend\\flutter\\smss",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-d", "192.168.8.15:5555"
+            ]
+        },
+        {
+            "name": "flu smss (profile mode)",
+            "cwd": "frontend\\flutter\\smss",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flu smss (release mode)",
+            "cwd": "frontend\\flutter\\smss",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "Ser smss",
+            "cwd": "backend\\service\\ssms_auth",
+            "request": "launch",
+            "type": "go",
+            "program": "${workspaceFolder}\\backend\\service\\ssms_auth"
+        },
+        {
+            "name": "Ser si",
+            "cwd": "backend\\service\\smart",
+            "request": "launch",
+            "type": "go",
+            "program": "${workspaceFolder}\\backend\\service\\smart"
+        },
+        {
+            "name": "flu si",
+            "cwd": "frontend\\flutter\\smart_inventory",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flu si (profile mode)",
+            "cwd": "frontend\\flutter\\smart_inventory",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flu si (release mode)",
+            "cwd": "frontend\\flutter\\smart_inventory",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flu ss",
+            "cwd": "frontend\\flutter\\ssms_sass",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "-d", "chrome"
+            ]
+        },
+        {
+            "name": "flu ss (profile mode)",
+            "cwd": "frontend\\flutter\\ssms_sass",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flu ss (release mode)",
+            "cwd": "frontend\\flutter\\ssms_sass",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+    ]
+}

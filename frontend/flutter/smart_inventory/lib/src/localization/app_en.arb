@@ -1,0 +1,6 @@
+{
+    "appName": "SmartInventory",
+    "@appName": {
+      "description": "Smart Inventory"
+    }
+  }

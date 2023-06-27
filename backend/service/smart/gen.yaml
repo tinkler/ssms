@@ -1,0 +1,6 @@
+dir: ./internal/model
+codes:
+  - typ: gsrv
+    out_dir: ./internal/gsrv
+  - typ: proto
+    out_dir: ./api/proto

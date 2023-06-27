@@ -1,0 +1,11 @@
+go 1.20
+
+use (
+	./backend/cmd/migrate
+	./backend/service/commodity
+	./backend/service/proxy
+	./backend/service/smart
+	./backend/service/ssms_auth
+	./backend/service/store_house
+	./backend/service/tester
+)

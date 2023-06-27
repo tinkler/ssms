@@ -1,0 +1,6 @@
+dir: ./internal/model
+codes:
+  - typ: chi_route
+    out_dir: ./internal/route
+  - typ: dart
+    out_dir: ../../../frontend/flutter/smss/lib/src/lib/model/commodity

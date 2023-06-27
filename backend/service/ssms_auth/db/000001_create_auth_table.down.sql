@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS authv1."user";
+-- DROP EXTENSION IF EXISTS "uuid-ossp";

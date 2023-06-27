@@ -1,0 +1,302 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: mqtt-gateway
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: envoy-config-map
+data:
+  envoy-override.yaml: |
+    admin:
+      access_log_path: /tmp/admin_access.log
+      address:
+        socket_address: { address: 0.0.0.0, port_value: 9901 }
+    static_resources:
+      listeners:
+      - name: listener_0
+        address:
+          socket_address: { address: 0.0.0.0, port_value: 9902 }
+        filter_chains:
+        - filters:
+          - name: envoy.filters.network.http_connection_manager
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+              stat_prefix: ingress_http
+              http_filters:
+              # - name: envoy.filters.http.platform_bridge
+              #   typed_config:
+              #     "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_http1_bridge.v3.Config
+              - name: envoy.filters.http.router
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+              route_config:
+                name: local_route
+                virtual_hosts:
+                - name: local_service
+                  domains: ["*"]
+                  routes:
+                  - match: { prefix: "/clans" }
+                    route:
+                      cluster: echo_service
+                  - match: { prefix: "/static/member" }
+                    route:
+                      # prefix_rewrite: "/static"
+                      cluster: echo_service_prod
+                  - match: { prefix: "/static/memorial" }
+                    route:
+                      # prefix_rewrite: "/static"
+                      cluster: memorial
+                  - match: { prefix: "/static/article" }
+                    route:
+                      # prefix_rewrite: "/static"
+                      cluster: article
+                  - match: { prefix: "/mqtt" }
+                    route:
+                      cluster: ssms_auth
+                  - match: { prefix: "/memorial" }
+                    route:
+                      cluster: memorial
+                  - match: { prefix: "/article" }
+                    route:
+                      cluster: article
+                  - match: { prefix: "/im" }
+                    route:
+                      cluster: im
+      - name: listener_1
+        address:
+          socket_address: { address: 0.0.0.0, port_value: 9903 }
+        filter_chains:
+        - filters:
+          - name: envoy.filters.network.tcp_proxy
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.network.tcp_proxy.v3.TcpProxy
+              stat_prefix: tcp_proxy
+              cluster: grpc_clusters
+      clusters:
+      - name: echo_service
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        lb_policy: round_robin
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: echo_service
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: "192.168.8.12"
+                    port_value: 10902
+      - name: memorial
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        lb_policy: round_robin
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: memorial
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: "192.168.8.12"
+                    port_value: 10903
+      - name: article
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        lb_policy: round_robin
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: article
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: "192.168.8.12"
+                    port_value: 10904
+      - name: im
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        lb_policy: round_robin
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: im
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: "192.168.8.12"
+                    port_value: 10905
+      - name: ssms_auth
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        lb_policy: round_robin
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: ssms_auth
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: "192.168.8.12"
+                    port_value: 11080
+      - name: echo_service_prod
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        lb_policy: round_robin
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: echo_service_prod
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: "172.12.1.12"
+                    port_value: 11080
+      - name: smart
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        lb_policy: round_robin
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: smart
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: "192.168.8.12"
+                    port_value: 10906
+      - name: grpc_clusters
+        connect_timeout: 0.25s
+        type: LOGICAL_DNS
+        lb_policy: round_robin
+        dns_lookup_family: V4_ONLY
+        load_assignment:
+          cluster_name: grpc_clusters
+          endpoints:
+          - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: "192.168.8.12"
+                    port_value: 10906
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: envoy-deployment
+spec:
+  selector:
+    matchLabels:
+      app: envoy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: envoy
+    spec:
+      containers:
+        - name: envoy
+          image: envoyproxy/envoy:v1.26-latest
+          ports:
+            - name: tcp
+              containerPort: 9903
+            - name: http
+              containerPort: 9902
+            - name: admin
+              containerPort: 9901
+          args:
+            - "-c"
+            - "/etc/envoy/envoy-override.yaml"
+          volumeMounts:
+            - name: envoy-override-volume
+              mountPath: /etc/envoy
+              readOnly: true
+      volumes:
+        - name: envoy-override-volume
+          configMap:
+            name: envoy-config-map
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: envoy
+spec:
+  selector:
+    app: envoy
+  ports:
+    - name: http
+      port: 9902
+      targetPort: 9902
+    - name: admin
+      port: 9901
+      targetPort: 9901
+    - name: tcp
+      port: 9903
+      targetPort: 9903
+  type: LoadBalancer
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: envoy
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - mqtt-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /clans
+    - uri:
+        prefix: /static
+    - uri:
+        prefix: /mqtt
+    - uri:
+        prefix: /memorial
+    - uri:
+        prefix: /article
+    - uri:
+        prefix: /im
+    route:
+    - destination:
+        host: envoy
+        port:
+          number: 9902
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: envoy-admin
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - mqtt-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /admin
+    route:
+    - destination:
+        host: envoy
+        port:
+          number: 9901

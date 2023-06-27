@@ -1,0 +1,6 @@
+{
+    "appTitle": "Smart Inventory",
+    "@appTitle": {
+      "description": "Smart Invertory base on chatGPT"
+    }
+}
