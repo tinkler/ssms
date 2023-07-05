@@ -33,7 +33,7 @@ func main() {
 	case "service/ssms_auth":
 		m, err = migrate.New(
 			"file://./db",
-			os.Getenv("MIGRATE_DSN"),
+			os.Getenv("MIGRATE_DSN")+"&search_path=authv1",
 		)
 	default:
 		log.Fatal("Unknown project name")
